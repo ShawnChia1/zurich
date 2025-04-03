@@ -20,13 +20,48 @@ export default function CheckpointsTab({
   currentCheckpoint,
   setCurrentCheckpoint,
 }: CheckpointsTabProps) {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: "task1", text: "Define project requirements", completed: true },
-    { id: "task2", text: "Create wireframes", completed: false },
-    { id: "task3", text: "Implement core features", completed: false },
-    { id: "task4", text: "Write test cases", completed: false },
-    { id: "task5", text: "Deploy to staging", completed: false },
-  ]);
+    const [tasks, setTasks] = useState<Task[]>([
+        {
+          id: "task1",
+          text: "Define project requirements",
+          completed: true,
+          sn: "SN001",
+          extensions: "Basic coverage",
+          sumInsured: "$10,000",
+        },
+        {
+          id: "task2",
+          text: "Create wireframes for the dashboard interface with responsive design considerations",
+          completed: false,
+          sn: "SN002",
+          extensions: "Extended coverage with additional liability protection",
+          sumInsured: "$25,000",
+        },
+        {
+          id: "task3",
+          text: "Implement core features including user authentication and data visualization",
+          completed: false,
+          sn: "SN003",
+          extensions: "Premium package",
+          sumInsured: "$50,000",
+        },
+        {
+          id: "task4",
+          text: "Write test cases for all critical user flows and edge cases",
+          completed: false,
+          sn: "SN004",
+          extensions: "Standard coverage",
+          sumInsured: "$15,000",
+        },
+        {
+          id: "task5",
+          text: "Deploy to staging environment and conduct final QA testing",
+          completed: false,
+          sn: "SN005",
+          extensions: "Basic coverage with optional add-ons",
+          sumInsured: "$30,000",
+        },
+      ])
 
   const [tableData, setTableData] = useState<TableData>({
     rows: ["Row 1", "Row 2", "Row 3"],
@@ -53,8 +88,8 @@ export default function CheckpointsTab({
     1: ComponentA,
     2: ComponentA,
     3: ComponentA,
-    4: ComponentC,
-    5: ComponentB,
+    4: ComponentB,
+    5: ComponentC,
     // Add more mappings as needed
   };
 
