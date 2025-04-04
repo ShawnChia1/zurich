@@ -21,11 +21,9 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
   const [searchText, setSearchText] = useState("")
   const [draggedTaskIndex, setDraggedTaskIndex] = useState<number | null>(null)
   const [newTask, setNewTask] = useState<Partial<Task>>({
-    text: "",
     sn: "",
     extensions: "",
     sumInsured: "",
-    completed: false,
   })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [matchedTaskIds, setMatchedTaskIds] = useState<Set<string>>(new Set())
@@ -42,12 +40,11 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
     const matches = new Set<string>()
 
     tasks.forEach((task) => {
-      const textMatch = task.text.toLowerCase().includes(searchLower)
       const snMatch = task.sn?.toLowerCase().includes(searchLower)
       const extensionsMatch = task.extensions?.toLowerCase().includes(searchLower)
       const sumInsuredMatch = task.sumInsured?.toLowerCase().includes(searchLower)
 
-      if (textMatch || snMatch || extensionsMatch || sumInsuredMatch) {
+      if (snMatch || extensionsMatch || sumInsuredMatch) {
         matches.add(task.id)
       }
     })
@@ -66,12 +63,9 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
 
   // Task management
   const addTask = () => {
-    if (newTask.text?.trim() === "") return
 
     const taskToAdd: Task = {
       id: Date.now().toString(),
-      text: newTask.text || "",
-      completed: false,
       sn: newTask.sn || "",
       extensions: newTask.extensions || "",
       sumInsured: newTask.sumInsured || "",
@@ -79,11 +73,9 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
 
     setTasks([...tasks, taskToAdd])
     setNewTask({
-      text: "",
       sn: "",
       extensions: "",
       sumInsured: "",
-      completed: false,
     })
     setIsDialogOpen(false)
   }
@@ -137,16 +129,16 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
   }
 
   return (
-    <Card>
+    <Card style={{color:'#203469'}}>
       <CardHeader>
-        <CardTitle>Draggable Task List</CardTitle>
+        <CardTitle>Table of Extensions</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex space-x-2 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search tasks..."
+              placeholder="Search extensions..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="pl-8"
@@ -161,19 +153,10 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add New Task</DialogTitle>
+                <DialogTitle>Add New Extension</DialogTitle>
               </DialogHeader>
 
               <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="task-text">Task Description</Label>
-                  <Input
-                    id="task-text"
-                    value={newTask.text || ""}
-                    onChange={(e) => setNewTask({ ...newTask, text: e.target.value })}
-                  />
-                </div>
-
                 <div className="grid gap-2">
                   <Label htmlFor="task-sn">SN</Label>
                   <Input
@@ -185,19 +168,21 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
 
                 <div className="grid gap-2">
                   <Label htmlFor="task-extensions">Extensions</Label>
-                  <Input
+                  <textarea
                     id="task-extensions"
                     value={newTask.extensions || ""}
                     onChange={(e) => setNewTask({ ...newTask, extensions: e.target.value })}
+                    className="w-full border rounded p-2 resize-vertical"
                   />
                 </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="task-sum-insured">Sum Insured</Label>
-                  <Input
+                  <textarea
                     id="task-sum-insured"
                     value={newTask.sumInsured || ""}
                     onChange={(e) => setNewTask({ ...newTask, sumInsured: e.target.value })}
+                    className="w-full border rounded p-2 resize-vertical"
                   />
                 </div>
               </div>
@@ -214,8 +199,8 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
 
         {/* Column Headers */}
         <div className="grid grid-cols-12 gap-4 mb-2 pl-10 font-medium text-sm">
-          <div className="col-span-2">SN</div>
-          <div className="col-span-5">Extensions</div>
+          <div className="col-span-1">SN</div>
+          <div className="col-span-6">Extensions</div>
           <div className="col-span-5">Sum Insured</div>
         </div>
 
@@ -249,15 +234,15 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
                     <GripVertical className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1 grid grid-cols-12 gap-4">
-                    <div className="col-span-2 break-words">
+                    <div className="col-span-1 break-words">
                       {searchText ? highlightMatch(task.sn || "", searchText) : task.sn}
                     </div>
 
-                    <div className="col-span-5 break-words">
+                    <div className="col-span-6 break-words" style={{ marginLeft: '0px' }}>
                       {searchText ? highlightMatch(task.extensions || "", searchText) : task.extensions}
                     </div>
 
-                    <div className="col-span-5 break-words">
+                    <div className="col-span-5 break-words" style={{ marginLeft: '30px' }}>
                       {searchText ? highlightMatch(task.sumInsured || "", searchText) : task.sumInsured}
                     </div>
                   </div>

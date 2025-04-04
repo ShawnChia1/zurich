@@ -16,7 +16,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({ label, value }) => {
         flex: 1, // Make each TextDisplay take equal space
       }}
     >
-      <label style={{ color: "#2b3e74", fontSize: "0.8rem" }}>{label}:</label>
+      <label style={{ fontSize: "0.8rem" }}>{label}:</label>
       <div
         style={{
           backgroundColor: "white",
@@ -36,12 +36,12 @@ const TextDisplay: React.FC<TextDisplayProps> = ({ label, value }) => {
 };
 
 const NamesAndTextBoxes: React.FC = () => {
-  const [accountName, setAccountName] = React.useState("");
-  const [newRenew, setNewRenew] = React.useState("");
+  const [accountName, setAccountName] = React.useState("DRIVER HARRIS COMPANY");
+  const [newRenew, setNewRenew] = React.useState("Renewal");
   const [sisPolicy, setSisPolicy] = React.useState("");
-  const [zhLobId, setZhLobId] = React.useState("");
-  const [gppVersion, setGppVersion] = React.useState("");
-  const [gppTransaction, setGppTransaction] = React.useState("");
+  const [zhLobId, setZhLobId] = React.useState("ZZ7RDMZ5QQQWQ98V");
+  const [gppVersion, setGppVersion] = React.useState("2");
+  const [gppTransaction, setGppTransaction] = React.useState("54032");
 
   return (
     <div
@@ -50,6 +50,7 @@ const NamesAndTextBoxes: React.FC = () => {
         display: "flex",
         flexWrap: "wrap",
         backgroundColor: "transparent",
+        color:'#203469'
       }}
     >
       <div style={{ display: "flex", width: "100%" }}>
@@ -59,7 +60,7 @@ const NamesAndTextBoxes: React.FC = () => {
         <TextDisplay label="New/Renew" value={newRenew} />
       </div>
 
-      <div style={{ display: "flex", width: "100%" }}>
+      <div style={{ display: "flex", width: "100%", fontSize: "100%"}}>
         <TextDisplay label="SIS Policy" value={sisPolicy} />
         <TextDisplay label="ZH Technical LoB ID" value={zhLobId} />
         <TextDisplay label="GPP Version" value={gppVersion} />
