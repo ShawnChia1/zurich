@@ -14,4 +14,6 @@ export interface TableData {
   columns: string[]
   rows: string[]
   cells: Record<string, string>
+  mergedCellsData?: Record<string, any>
+  isFullScreen?: boolean
 }

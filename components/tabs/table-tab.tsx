@@ -70,15 +70,14 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
   const [selectedCells, setSelectedCells] = useState<string[]>([])
   const [mergedCells, setMergedCells] = useState<Record<string, MergedCell>>({})
   const [availableColumns, setAvailableColumns] = useState<string[]>([
-    "ID",
-    "Name",
-    "Email",
-    "Phone",
-    "Address",
-    "City",
-    "State",
-    "Zip",
-    "Country",
+    "Item",
+    "Event Name",
+    "Venue",
+    "Event Date",
+    "Sum Insured Per Person (SGD)",
+    "No of Participants",
+    "Premium Rate Per Participant (SGD)",
+    "Total Premium (SGD)",
   ])
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
   const [sorting, setSorting] = useState<SortingState>([])
@@ -94,6 +93,14 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
   const tableRef = useRef<HTMLDivElement>(null)
   const fullScreenRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    console.log("TableEditor mergedCells state:", mergedCells)
+  }, [mergedCells])
+
+  useEffect(() => {
+    console.log("TableEditor tableData state:", tableData)
+  }, [tableData])
 
   // Initialize column widths
   useEffect(() => {
@@ -242,18 +249,23 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
   // Save cell value when done editing
   const finishEditing = useCallback(() => {
     if (editingCell) {
+      console.log("mergedCells before setTableData:", mergedCells)
       setTableData((prevData) => ({
         ...prevData,
         cells: {
           ...prevData.cells,
           [editingCell]: editingValue,
         },
+        // Store mergedCells in tableData to persist across rerenders
+        mergedCellsData: mergedCells,
+        // Store fullscreen state in tableData to persist across rerenders
+        isFullScreen: isFullScreen,
       }))
 
       setEditingCell(null)
       setEditingValue("")
     }
-  }, [editingCell, editingValue, setTableData])
+  }, [editingCell, editingValue, setTableData, mergedCells, isFullScreen])
 
   // Add a new column
   const addColumn = useCallback(() => {
@@ -439,7 +451,9 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     setTableData((prev) => ({
       ...prev,
       cells: newCells,
+      mergedCellsData: newMergedCells,
     }))
+    console.log("newMergedCells:", JSON.stringify(newMergedCells, null, 2))
     setMergedCells(newMergedCells)
     setSelectedCells([])
   }, [canMergeCells, selectedCells, tableData, mergedCells, setTableData])
@@ -457,8 +471,12 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     delete newMergedCells[cellId]
 
     setMergedCells(newMergedCells)
+    setTableData((prev) => ({
+      ...prev,
+      mergedCellsData: newMergedCells,
+    }))
     setSelectedCells([])
-  }, [selectedCells, mergedCells])
+  }, [selectedCells, mergedCells, setTableData])
 
   // Toggle fullscreen mode
   const toggleFullScreen = useCallback(() => {
@@ -475,6 +493,14 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
       }
     })
   }, [])
+
+  // Check if a column is already in the table
+  const isColumnInTable = useCallback(
+    (column: string) => {
+      return tableData.columns.includes(column)
+    },
+    [tableData.columns],
+  )
 
   // Sort column
   const sortColumn = useCallback((columnId: string, direction: "asc" | "desc" | null) => {
@@ -569,11 +595,25 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     return tableStructure
   }, [table, tableData, mergedCells])
 
+  // Add this useEffect after the other useEffect hooks
+  useEffect(() => {
+    if (tableData.mergedCellsData && Object.keys(tableData.mergedCellsData).length > 0) {
+      setMergedCells(tableData.mergedCellsData)
+    }
+  }, [tableData.mergedCellsData])
+
+  // Add this useEffect to restore fullscreen state from tableData
+  useEffect(() => {
+    if (tableData.isFullScreen !== undefined) {
+      setIsFullScreen(tableData.isFullScreen)
+    }
+  }, [tableData.isFullScreen])
+
   // Render the table content
   const renderTableContent = () => {
     // Get the sorted and filtered rows from TanStack Table
     const rows = table.getRowModel().rows
-
+    console.log("mergedCells: " + mergedCells)
     return (
       <>
         <div className="flex flex-col space-y-4 mb-4">
@@ -597,16 +637,22 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                {availableColumns.map((column) => (
-                  <DropdownMenuCheckboxItem
-                    key={column}
-                    checked={selectedColumns.includes(column)}
-                    onCheckedChange={() => toggleColumnSelection(column)}
-                    onSelect={(e) => e.preventDefault()}
-                  >
-                    {column}
-                  </DropdownMenuCheckboxItem>
-                ))}
+                {availableColumns.map((column) => {
+                  const alreadyInTable = isColumnInTable(column)
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column}
+                      checked={selectedColumns.includes(column)}
+                      onCheckedChange={() => !alreadyInTable && toggleColumnSelection(column)}
+                      onSelect={(e) => e.preventDefault()}
+                      disabled={alreadyInTable}
+                      className={alreadyInTable ? "opacity-50 cursor-not-allowed" : ""}
+                    >
+                      {column}
+                      {alreadyInTable && <span className="ml-2 text-xs text-muted-foreground">(already in table)</span>}
+                    </DropdownMenuCheckboxItem>
+                  )
+                })}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   disabled={selectedColumns.length === 0}
@@ -759,6 +805,8 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
                     {tableData.columns.map((column, colIndex) => {
                       const cellId = `${rowId}-${column}`
 
+                      // console.log("Rendering cell:", cellId, "mergedCells:", mergedCells);
+
                       // Skip if this cell has already been rendered as part of a merged cell
                       if (renderedCells.has(cellId)) {
                         return null
@@ -775,6 +823,8 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
 
                       // Get merged cell properties if this is a merged cell
                       const mergedCell = mergedCells[cellId]
+                      // console.log("Cell:", cellId, "mergedCell:", mergedCell); // Add this line
+                      // console.log("rowSpan:", mergedCell?.rowSpan, "colSpan:", mergedCell?.colSpan); // Add this line
                       const isSelected = selectedCells.includes(cellId)
 
                       // If this is a merged cell, mark all covered cells as rendered
@@ -864,4 +914,6 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     </Card>
   )
 }
+
+
 

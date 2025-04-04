@@ -55,7 +55,7 @@ export default function CheckpointsTab({
 
   const [tableData, setTableData] = useState<TableData>({
     rows: ["1", "2", "3"],
-    columns: ["ID", "Name", "Email"],
+    columns: ["Item", "Event Name", "Venue", "Event Date", "Sum Insured Per Person (SGD)"],
     cells: {},
   });
 
