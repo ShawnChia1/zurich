@@ -246,26 +246,71 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     [tableData.cells],
   )
 
-  // Save cell value when done editing
+  // Add a function to check if a column has merged cells underneath it
+  // Add this after the isColumnInTable function
+  const hasColumnMergedCells = useCallback(
+    (column: string) => {
+      // Check if any merged cell spans across this column
+      return Object.values(mergedCells).some((mergedCell) => {
+        const [startRow, startCol] = mergedCell.startRow ? [mergedCell.startRow, mergedCell.startCol] : ["", ""]
+        const startColIndex = tableData.columns.indexOf(startCol)
+
+        // If this merged cell has colSpan > 1, check if it affects the given column
+        if (mergedCell.colSpan > 1) {
+          const endColIndex = startColIndex + mergedCell.colSpan - 1
+          const columnIndex = tableData.columns.indexOf(column)
+          return columnIndex >= startColIndex && columnIndex <= endColIndex
+        }
+
+        // If this is the starting column of a merged cell
+        return startCol === column
+      })
+    },
+    [mergedCells, tableData.columns],
+  )
+
+  // Modify the finishEditing function to properly maintain sort order after editing
+  // Replace the current finishEditing function with this improved version:
+
   const finishEditing = useCallback(() => {
     if (editingCell) {
       console.log("mergedCells before setTableData:", mergedCells)
-      setTableData((prevData) => ({
-        ...prevData,
-        cells: {
-          ...prevData.cells,
-          [editingCell]: editingValue,
-        },
-        // Store mergedCells in tableData to persist across rerenders
-        mergedCellsData: mergedCells,
-        // Store fullscreen state in tableData to persist across rerenders
-        isFullScreen: isFullScreen,
-      }))
+
+      // Store the current sorting state
+      const currentSorting = [...sorting]
+
+      setTableData((prevData) => {
+        const newData = {
+          ...prevData,
+          cells: {
+            ...prevData.cells,
+            [editingCell]: editingValue,
+          },
+          // Store mergedCells in tableData to persist across rerenders
+          mergedCellsData: mergedCells,
+          // Store fullscreen state in tableData to persist across rerenders
+          isFullScreen: isFullScreen,
+          // Store the current sorting state in tableData
+          sortingState: currentSorting,
+        }
+
+        return newData
+      })
+
+      // Ensure the table maintains its sort order
+      // We need to force a re-sort by temporarily clearing and then re-applying the sort
+      if (currentSorting.length > 0) {
+        // Use setTimeout to ensure this happens after the state update
+        setTimeout(() => {
+          // Force re-sort by applying the same sorting configuration
+          setSorting([...currentSorting])
+        }, 0)
+      }
 
       setEditingCell(null)
       setEditingValue("")
     }
-  }, [editingCell, editingValue, setTableData, mergedCells, isFullScreen])
+  }, [editingCell, editingValue, setTableData, mergedCells, isFullScreen, sorting])
 
   // Add a new column
   const addColumn = useCallback(() => {
@@ -405,6 +450,15 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     const rowSpan = maxRow - minRow + 1
     const colSpan = maxCol - minCol + 1
 
+    // Check if any of the affected columns are currently sorted
+    const affectedColumns = tableData.columns.slice(minCol, maxCol + 1)
+    const hasSortedColumns = sorting.some((sort) => affectedColumns.includes(sort.id))
+
+    // If we're creating a merge that spans multiple columns and any are sorted, clear the sorting
+    if (colSpan > 1 && hasSortedColumns) {
+      setSorting([])
+    }
+
     // Collect all cells that will be covered by this merge
     const coveredCells: string[] = []
     for (let r = minRow; r <= maxRow; r++) {
@@ -456,7 +510,7 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     console.log("newMergedCells:", JSON.stringify(newMergedCells, null, 2))
     setMergedCells(newMergedCells)
     setSelectedCells([])
-  }, [canMergeCells, selectedCells, tableData, mergedCells, setTableData])
+  }, [canMergeCells, selectedCells, tableData, mergedCells, setTableData, sorting])
 
   // Unmerge cells
   const unmergeCells = useCallback(() => {
@@ -502,19 +556,24 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     [tableData.columns],
   )
 
-  // Sort column
+  // Modified Sort column function to clear previous sorts when sorting a new column
   const sortColumn = useCallback((columnId: string, direction: "asc" | "desc" | null) => {
     setSorting((prev) => {
+      // If direction is null, we're clearing the sort for this column
       if (direction === null) {
         return prev.filter((sort) => sort.id !== columnId)
       }
 
+      // Check if we're sorting the same column that's already being sorted
       const existingSort = prev.find((sort) => sort.id === columnId)
-      if (existingSort) {
-        return prev.map((sort) => (sort.id === columnId ? { ...sort, desc: direction === "desc" } : sort))
-      }
 
-      return [...prev, { id: columnId, desc: direction === "desc" }]
+      if (existingSort) {
+        // If we're sorting the same column, just update its direction
+        return prev.map((sort) => (sort.id === columnId ? { ...sort, desc: direction === "desc" } : sort))
+      } else {
+        // If we're sorting a new column, replace any existing sorts with this one
+        return [{ id: columnId, desc: direction === "desc" }]
+      }
     })
   }, [])
 
@@ -608,6 +667,15 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
       setIsFullScreen(tableData.isFullScreen)
     }
   }, [tableData.isFullScreen])
+
+  // Add this useEffect to restore sorting state from tableData
+  // Add this after the other useEffect hooks:
+
+  useEffect(() => {
+    if (tableData.sortingState && tableData.sortingState.length > 0) {
+      setSorting(tableData.sortingState)
+    }
+  }, [tableData.sortingState])
 
   // Render the table content
   const renderTableContent = () => {
@@ -713,28 +781,47 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
                       <div className="flex items-center space-x-1">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-gray-100">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={cn(
+                                "h-6 w-6",
+                                hasColumnMergedCells(column) ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100",
+                              )}
+                              disabled={hasColumnMergedCells(column)}
+                            >
                               <ArrowUpDown className="h-3 w-3" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem
-                              onClick={() => sortColumn(column, "asc")}
-                              className="flex justify-between"
-                            >
-                              <span>Sort Ascending</span>
-                              {sorting.some((s) => s.id === column && !s.desc) && <ArrowUp className="h-4 w-4" />}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => sortColumn(column, "desc")}
-                              className="flex justify-between"
-                            >
-                              <span>Sort Descending</span>
-                              {sorting.some((s) => s.id === column && s.desc) && <ArrowDown className="h-4 w-4" />}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => sortColumn(column, null)} className="flex justify-between">
-                              <span>Clear Sort</span>
-                            </DropdownMenuItem>
+                            {hasColumnMergedCells(column) ? (
+                              <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                                Sorting disabled for columns with merged cells
+                              </div>
+                            ) : (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => sortColumn(column, "asc")}
+                                  className="flex justify-between"
+                                >
+                                  <span>Sort Ascending</span>
+                                  {sorting.some((s) => s.id === column && !s.desc) && <ArrowUp className="h-4 w-4" />}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => sortColumn(column, "desc")}
+                                  className="flex justify-between"
+                                >
+                                  <span>Sort Descending</span>
+                                  {sorting.some((s) => s.id === column && s.desc) && <ArrowDown className="h-4 w-4" />}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => sortColumn(column, null)}
+                                  className="flex justify-between"
+                                >
+                                  <span>Clear Sort</span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
                             <DropdownMenuSeparator />
                             <div className="p-2">
                               <p className="text-xs font-medium mb-1">Filter</p>
@@ -891,7 +978,7 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
       <div
         ref={fullScreenRef}
         className="fixed inset-0 z-50 bg-white overflow-auto p-6"
-        style={{ width: "100vw", height: "100vh" }}
+        style={{ width: "100vw", height: "100vh", color: "#23366f" }}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Table Editor</h2>
@@ -906,7 +993,7 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
 
   // Normal view
   return (
-    <Card>
+    <Card style={{color: "#23366f"}}>
       <CardHeader>
         <CardTitle>Dynamic Table</CardTitle>
       </CardHeader>
@@ -914,6 +1001,3 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     </Card>
   )
 }
-
-
-

@@ -26,49 +26,43 @@ export default function WorkflowManagement() {
   ]);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto">
       <NamesAndTextBoxes />
       <br />
-
       <div className="relative mb-8">
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-muted -translate-y-1/2" />
-          <div className="flex justify-between relative">
-            {checkpoints.map((checkpoint, index) => (
+        <div className="absolute top-1/2 left-0 right-0 h-1 bg-muted -translate-y-1/2" />
+        <div className="flex justify-between relative">
+          {checkpoints.map((checkpoint, index) => (
+            <div
+              key={checkpoint.id}
+              className="flex flex-col items-center"
+              onClick={() => setCurrentCheckpoint(index)}
+            >
               <div
-                key={checkpoint.id}
-                className="flex flex-col items-center"
-                onClick={() => setCurrentCheckpoint(index)}
-              >
+                className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center z-10 cursor-pointer transition-colors"
+                )}
+                style={{ backgroundColor: "#1fb1e6", border: "1px solid #23366f"}}
+              />
+              <div className="mt-2 text-center">
                 <div
                   className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center z-10 cursor-pointer transition-colors",
-                    index <= currentCheckpoint
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
+                    "font-medium text-sm",
+                    index === currentCheckpoint
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   )}
+                  style={{
+                    color: index === currentCheckpoint ? '#23366f' : undefined,
+                  }}
                 >
-                  {index < currentCheckpoint ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <span>{index + 1}</span>
-                  )}
-                </div>
-                <div className="mt-2 text-center">
-                  <div
-                    className={cn(
-                      "font-medium text-sm",
-                      index === currentCheckpoint
-                        ? "text-primary"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    {checkpoint.title}
-                  </div>
+                  {checkpoint.title}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+      </div>
 
       {/* Workflow Checkpoints */}
       <CheckpointsTab

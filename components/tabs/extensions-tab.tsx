@@ -147,11 +147,11 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="icon">
+              <Button size="icon" style={{background: "#23366f"}}>
                 <Plus className="h-5 w-5" />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent style={{color: "#23366f"}}>
               <DialogHeader>
                 <DialogTitle>Add New Extension</DialogTitle>
               </DialogHeader>
@@ -191,23 +191,22 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={addTask}>Add Task</Button>
+                <Button onClick={addTask} style={{background: "#23366f"}}>Add Task</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
 
         {/* Column Headers */}
-        <div className="grid grid-cols-12 gap-4 mb-2 pl-10 font-medium text-sm">
-          <div className="col-span-1">SN</div>
-          <div className="col-span-6">Extensions</div>
-          <div className="col-span-5">Sum Insured</div>
+        <div className="grid grid-cols-12  mb-2= pl-2 font-medium text-sm">
+          <div className="col-span-1"><b className="text-base">SN</b></div>
+          <div className="col-span-6"><b className="text-base">Extensions</b></div>
+          <div className="col-span-5"><b className="text-base">Sum Insured</b></div>
         </div>
 
         <div className="space-y-2">
           {tasks.map((task, index) => {
             const isMatch = matchedTaskIds.has(task.id)
-
             return (
               <div
                 key={task.id}
@@ -224,25 +223,22 @@ export default function TasksTab({ tasks, setTasks }: TasksTabProps) {
                 onDrop={(e) => handleDrop(e, index)}
                 onDragEnd={() => setDraggedTaskIndex(null)}
                 className={cn(
-                  "flex items-start justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors",
+                  "flex items-start justify-between border rounded-md hover:bg-muted/50 transition-colors",
                   draggedTaskIndex === index ? "opacity-50" : "",
                   isMatch && searchText ? "ring-2 ring-yellow-400 dark:ring-yellow-600" : "",
                 )}
               >
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="cursor-move mt-1">
-                    <GripVertical className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 grid grid-cols-12 gap-4">
-                    <div className="col-span-1 break-words">
+                  <div className="flex-1 grid grid-cols-12 gap-4" >
+                    <div className="col-span-1 break-words p-3" style={{background: "#23366f", color: "white"}}>
                       {searchText ? highlightMatch(task.sn || "", searchText) : task.sn}
                     </div>
 
-                    <div className="col-span-6 break-words" style={{ marginLeft: '0px' }}>
+                    <div className="col-span-6 break-words p-3">
                       {searchText ? highlightMatch(task.extensions || "", searchText) : task.extensions}
                     </div>
 
-                    <div className="col-span-5 break-words" style={{ marginLeft: '30px' }}>
+                    <div className="col-span-5 break-words p-3" style={{ marginLeft: '8px' }}>
                       {searchText ? highlightMatch(task.sumInsured || "", searchText) : task.sumInsured}
                     </div>
                   </div>

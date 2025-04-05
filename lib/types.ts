@@ -16,4 +16,5 @@ export interface TableData {
   cells: Record<string, string>
   mergedCellsData?: Record<string, any>
   isFullScreen?: boolean
+  sortingState?: { id: string; desc: boolean }[]
 }
