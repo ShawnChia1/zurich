@@ -40,9 +40,9 @@ export default function WorkflowManagement() {
             >
               <div
                 className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center z-10 cursor-pointer transition-colors"
+                  "w-6 h-6 rounded-full flex items-center justify-center z-10 cursor-pointer transition-colors"
                 )}
-                style={{ backgroundColor: "#1fb1e6", border: "1px solid #23366f"}}
+                style={{ backgroundColor: "#1fb1e6" }}
               />
               <div className="mt-2 text-center">
                 <div
