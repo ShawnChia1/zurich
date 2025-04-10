@@ -41,6 +41,7 @@ import {
 } from "lucide-react"
 import type { TableData } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { stringify } from "querystring"
 
 interface TableTabProps {
   tableData: TableData
@@ -93,14 +94,6 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
   const tableRef = useRef<HTMLDivElement>(null)
   const fullScreenRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  useEffect(() => {
-    console.log("TableEditor mergedCells state:", mergedCells)
-  }, [mergedCells])
-
-  useEffect(() => {
-    console.log("TableEditor tableData state:", tableData)
-  }, [tableData])
 
   // Initialize column widths
   useEffect(() => {
@@ -274,8 +267,6 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
 
   const finishEditing = useCallback(() => {
     if (editingCell) {
-      console.log("mergedCells before setTableData:", mergedCells)
-
       // Store the current sorting state
       const currentSorting = [...sorting]
 
@@ -507,7 +498,6 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
       cells: newCells,
       mergedCellsData: newMergedCells,
     }))
-    console.log("newMergedCells:", JSON.stringify(newMergedCells, null, 2))
     setMergedCells(newMergedCells)
     setSelectedCells([])
   }, [canMergeCells, selectedCells, tableData, mergedCells, setTableData, sorting])
@@ -598,62 +588,6 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     setColumnFilters((prev) => prev.filter((filter) => filter.id !== columnId))
   }, [])
 
-  // Build the table structure with merged cells
-  const buildTableStructure = useCallback(() => {
-    const rows = table.getRowModel().rows
-    const tableStructure: CellInfo[][] = []
-
-    // Initialize the table structure with default cells
-    rows.forEach((row, rowIndex) => {
-      const rowId = row.original.id
-      tableStructure[rowIndex] = []
-
-      tableData.columns.forEach((column, colIndex) => {
-        const cellId = `${rowId}-${column}`
-        tableStructure[rowIndex][colIndex] = {
-          rowId,
-          colId: column,
-          rowSpan: 1,
-          colSpan: 1,
-          content: tableData.cells[cellId] || "",
-          isVisible: true,
-        }
-      })
-    })
-
-    // Apply merged cells
-    Object.entries(mergedCells).forEach(([cellId, mergedCell]) => {
-      const [rowId, colId] = cellId.split("-")
-      const rowIndex = tableData.rows.indexOf(rowId)
-      const colIndex = tableData.columns.indexOf(colId)
-
-      if (rowIndex >= 0 && colIndex >= 0) {
-        // Set the merged cell properties
-        tableStructure[rowIndex][colIndex] = {
-          rowId,
-          colId,
-          rowSpan: mergedCell.rowSpan,
-          colSpan: mergedCell.colSpan,
-          content: tableData.cells[cellId] || "",
-          isVisible: true,
-        }
-
-        // Mark covered cells as not visible
-        mergedCell.coveredCells.forEach((coveredCellId) => {
-          const [coveredRowId, coveredColId] = coveredCellId.split("-")
-          const coveredRowIndex = tableData.rows.indexOf(coveredRowId)
-          const coveredColIndex = tableData.columns.indexOf(coveredColId)
-
-          if (coveredRowIndex >= 0 && coveredColIndex >= 0) {
-            tableStructure[coveredRowIndex][coveredColIndex].isVisible = false
-          }
-        })
-      }
-    })
-
-    return tableStructure
-  }, [table, tableData, mergedCells])
-
   // Add this useEffect after the other useEffect hooks
   useEffect(() => {
     if (tableData.mergedCellsData && Object.keys(tableData.mergedCellsData).length > 0) {
@@ -677,11 +611,27 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     }
   }, [tableData.sortingState])
 
+  const handleDragStart = useCallback((event:React.DragEvent, columnIndex:any) => {
+    event.dataTransfer.setData('columnIndex', columnIndex);
+  }, []);
+
+  const handleDragOver = useCallback((event:React.DragEvent) => {
+    event.preventDefault(); // Allow drop
+  }, []);
+
+  const handleDrop = useCallback((event:React.DragEvent, targetIndex:number) => {
+    const draggedIndex = parseInt(event.dataTransfer.getData('columnIndex'));
+    const newColumns = [...tableData.columns];
+    const [draggedColumn] = newColumns.splice(draggedIndex, 1);
+    newColumns.splice(targetIndex, 0, draggedColumn);
+
+    setTableData(prevData => ({ ...prevData, columns: newColumns }));
+  }, [tableData.columns, setTableData]);
+
   // Render the table content
   const renderTableContent = () => {
     // Get the sorted and filtered rows from TanStack Table
     const rows = table.getRowModel().rows
-    console.log("mergedCells: " + mergedCells)
     return (
       <>
         <div className="flex flex-col space-y-4 mb-4">
@@ -770,6 +720,10 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
                 {tableData.columns.map((column, index) => (
                   <th
                     key={`header-${column}-${index}`}
+                    draggable="true"
+                    onDragStart={(event) => handleDragStart(event, index)}
+                    onDragOver={handleDragOver}
+                    onDrop={(event) => handleDrop(event, index)}
                     className="p-0 border-b border-r relative"
                     style={{
                       width: `${columnWidths[column] || 150}px`,
@@ -892,8 +846,6 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
                     {tableData.columns.map((column, colIndex) => {
                       const cellId = `${rowId}-${column}`
 
-                      // console.log("Rendering cell:", cellId, "mergedCells:", mergedCells);
-
                       // Skip if this cell has already been rendered as part of a merged cell
                       if (renderedCells.has(cellId)) {
                         return null
@@ -910,8 +862,6 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
 
                       // Get merged cell properties if this is a merged cell
                       const mergedCell = mergedCells[cellId]
-                      // console.log("Cell:", cellId, "mergedCell:", mergedCell); // Add this line
-                      // console.log("rowSpan:", mergedCell?.rowSpan, "colSpan:", mergedCell?.colSpan); // Add this line
                       const isSelected = selectedCells.includes(cellId)
 
                       // If this is a merged cell, mark all covered cells as rendered
