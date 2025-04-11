@@ -35,6 +35,10 @@ export default async function handler(
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
+      port: 1433, // Azure SQL Server default port
+      ssl: {
+        rejectUnauthorized: false, // Azure SQL needs this
+      }
     });
     console.log("Database connection successful!");
     await connection.end();
