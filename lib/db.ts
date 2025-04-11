@@ -9,16 +9,17 @@ interface DatabaseConfig {
 }
 
 const dbConfig: DatabaseConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
+  host: "sg-np-wbsq-sql-z01.database.windows.net",
+  user: "WBSQLADMIN",
+  password: "Workbench@2024",
+  database: "ZSGWBUAT"
 };
 
 let pool: Pool | null = null;
 
 async function getPool(): Promise<Pool> {
   if (!pool) {
+    console.log("DB Config being used:", dbConfig);
     pool = mysql.createPool(dbConfig);
   }
   return pool;
@@ -42,17 +43,19 @@ export async function executeQuery<T = RowDataPacket>(
 }
 
 export interface Row {
-  taskName: number;
-  startDate: string;
+  taskName: string;
+  startDate: Date;
   startTime: string;
   endTime: string;
-  indicator: string;
-  rowCountUpdated: string;
-  rowCountInserted: string;
+  indicator: number;
+  rowCountUpdated: number;
+  rowCountInserted: number;
+  id: number
 }
 
 export async function getAllUsers(): Promise<Row[]> {
-  return executeQuery<Row>('SELECT TOP 3 * FROM [dbo].[CATEGORY_NAMES];');
+  //console.log(dbConfig["host"]);
+  return executeQuery<Row>('SELECT TOP 3 * FROM [dbo].[AUDIT_PACKAGE];');
 }
 
 export async function getUserById(id: number): Promise<Row | undefined> {
