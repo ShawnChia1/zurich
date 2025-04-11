@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Row } from '@/lib/db';
+import { Extension } from '@/lib/db';
 
-export default function UserList() {
-  const [users, setUsers] = useState<Row[]>([]); // Added type to users state
+export default function extensionList() {
+  const [extension, setextension] = useState<Extension[]>([]); // Added type to extension state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    (async function fetchUsers() { // IIFE
+    (async function fetchextension() {
       try {
-        const response = await fetch('/api/users');
+        const response = await fetch('/api/extensions');
         console.log('Raw Response:', response);
 
         if (!response.ok) {
@@ -18,7 +18,7 @@ export default function UserList() {
 
         const data = await response.json();
         console.log('Parsed JSON Data:', data);
-        setUsers(data);
+        setextension(data);
       } catch (err) {
         console.error('Error:', err);
       } finally {
@@ -38,16 +38,13 @@ export default function UserList() {
   return (
     <div>
       Hello <br />
-      {users.map((user: Row, index) => (
-        <div key={index}> {/* use user.id as key */}
-          Task Name: {user.taskName} <br />
-          Start Date: {user.startDate ? user.startDate.toLocaleDateString() : 'N/A'} <br />
-          Start Time: {user.startTime} <br />
-          End Time: {user.endTime} <br />
-          Indicator: {user.indicator} <br />
-          Row Count Updated: {user.rowCountUpdated} <br />
-          Row Count Inserted: {user.rowCountInserted} <br />
-          ID: {user.id} <br />
+      {extension.map((extension: Extension, index) => (
+        <div key={index}> {/* use extension.id as key */}
+          item: {extension.item} <br />
+          eventName: {extension.eventName} <br />
+          venue: {extension.venue} <br />
+          eventDate: {extension.eventDate ? extension.eventDate.toLocaleDateString() : 'N/A'} <br />
+          sumInsuredPerPerson: {extension.sumInsuredPerPerson} <br />
           <br />
         </div>
       ))}

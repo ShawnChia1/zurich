@@ -23,22 +23,18 @@ async function getPool(): Promise<ConnectionPool> {
 
 export async function executeQuery<T = any>(
   query: string,
-  params: any[] = []
+  params: Record<string, any> = {}
 ): Promise<T[]> {
   try {
     const pool = await getPool();
     const request = pool.request();
 
     // Add parameters if provided
-    params.forEach((param, index) => {
-      request.input(`param${index}`, param);
-    });
+    for (const paramName in params) {
+      request.input(paramName, params[paramName]);
+    }
 
-    const result: IResult<T> = await request.query(
-      params.length > 0
-        ? query.replace(/\?/g, (_, i = 0) => `@param${i++}`)
-        : query
-    );
+    const result: IResult<T> = await request.query(query);
 
     return result.recordset;
   } catch (error: any) {
@@ -47,25 +43,49 @@ export async function executeQuery<T = any>(
   }
 }
 
-export interface Row {
-  taskName: string;
-  startDate: Date;
-  startTime: string;
-  endTime: string;
-  indicator: number;
-  rowCountUpdated: number;
-  rowCountInserted: number;
-  id: number;
+export interface Extension {
+  item: number;
+  eventName: string;
+  venue: string;
+  eventDate: Date;
+  sumInsuredPerPerson: number;
 }
 
-export async function getAllUsers(): Promise<Row[]> {
-  return executeQuery<Row>('SELECT TOP 3 * FROM [dbo].[AUDIT_PACKAGE]');
+export async function getAllExtensions(): Promise<Extension[]> {
+  return executeQuery<Extension>('SELECT * FROM [dbo].[Extension_Test]');
 }
 
-export async function getUserById(id: number): Promise<Row | undefined> {
-  const results = await executeQuery<Row>(
-    'SELECT id, name, email FROM users WHERE id = ?',
-    [id]
-  );
-  return results[0];
+export async function insertExtensions(extensions: Extension[]): Promise<number[]> {
+  const query = `
+    INSERT INTO [dbo].[Extension_Test] (item, eventName, venue, eventDate, sumInsuredPerPerson)
+    VALUES ${extensions.map(
+      (_, index) => `(@item${index}, @eventName${index}, @venue${index}, @eventDate${index}, @sumInsuredPerPerson${index})`
+    ).join(', ')};
+    SELECT SCOPE_IDENTITY() AS id;
+  `;
+
+  try {
+    const params: any[] = [];
+    extensions.forEach((extension, index) => {
+      params.push(
+        extension.item,
+        extension.eventName,
+        extension.venue,
+        extension.eventDate,
+        extension.sumInsuredPerPerson
+      );
+    });
+
+    const result = await executeQuery<{ id: number }>(query, params);
+    if(result && result.length > 0){
+        // return the id of the first inserted row.
+        return [result[0].id];
+    } else {
+        return [];
+    }
+
+  } catch (error) {
+    console.error('Error inserting extensions:', error);
+    throw error;
+  }
 }
