@@ -1,41 +1,46 @@
-import { StringToBoolean } from 'class-variance-authority/types';
-import mysql, { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise';
+import sql, { ConnectionPool, config as SqlConfig, IResult } from 'mssql';
 
-interface DatabaseConfig {
-  host?: string;
-  user?: string;
-  password?: string;
-  database?: string;
-}
-
-const dbConfig: DatabaseConfig = {
-  host: "sg-np-wbsq-sql-z01.database.windows.net",
-  user: "WBSQLADMIN",
-  password: "Workbench@2024",
-  database: "ZSGWBUAT"
+const dbConfig: SqlConfig = {
+  server: 'sg-np-wbsq-sql-z01.database.windows.net',
+  user: 'WBSQLADMIN',
+  password: 'Workbench@2024',
+  database: 'ZSGWBUAT',
+  port: 1433,
+  options: {
+    encrypt: true,
+    trustServerCertificate: false,
+  },
 };
 
-let pool: Pool | null = null;
+let pool: ConnectionPool | null = null;
 
-async function getPool(): Promise<Pool> {
+async function getPool(): Promise<ConnectionPool> {
   if (!pool) {
-    console.log("DB Config being used:", dbConfig);
-    pool = mysql.createPool(dbConfig);
+    pool = await sql.connect(dbConfig);
   }
   return pool;
 }
 
-interface QueryResult extends Array<RowDataPacket[]> {}
-
-export async function executeQuery<T = RowDataPacket>(
+export async function executeQuery<T = any>(
   query: string,
   params: any[] = []
 ): Promise<T[]> {
   try {
-    const connection: PoolConnection = await (await getPool()).getConnection();
-    const [rows] = await connection.execute<T[] & RowDataPacket[]>(query, params);
-    connection.release();
-    return rows;
+    const pool = await getPool();
+    const request = pool.request();
+
+    // Add parameters if provided
+    params.forEach((param, index) => {
+      request.input(`param${index}`, param);
+    });
+
+    const result: IResult<T> = await request.query(
+      params.length > 0
+        ? query.replace(/\?/g, (_, i = 0) => `@param${i++}`)
+        : query
+    );
+
+    return result.recordset;
   } catch (error: any) {
     console.error('Database query error:', error);
     throw error;
@@ -50,17 +55,17 @@ export interface Row {
   indicator: number;
   rowCountUpdated: number;
   rowCountInserted: number;
-  id: number
+  id: number;
 }
 
 export async function getAllUsers(): Promise<Row[]> {
-  //console.log(dbConfig["host"]);
-  return executeQuery<Row>('SELECT TOP 3 * FROM [dbo].[AUDIT_PACKAGE];');
+  return executeQuery<Row>('SELECT TOP 3 * FROM [dbo].[AUDIT_PACKAGE]');
 }
 
 export async function getUserById(id: number): Promise<Row | undefined> {
-  const results = await executeQuery<Row>('SELECT id, name, email FROM users WHERE id = ?', [id]);
+  const results = await executeQuery<Row>(
+    'SELECT id, name, email FROM users WHERE id = ?',
+    [id]
+  );
   return results[0];
 }
-
-// Add more functions for other entities and database operations
