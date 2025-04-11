@@ -59,6 +59,17 @@ export default function CheckpointsTab({
     cells: {},
   });
 
+  const handlePreviewClick = () => {
+    localStorage.setItem('tableData', JSON.stringify(tableData));
+    const newWindow = window.open('/doc-preview', '_blank');
+
+    if (newWindow) {
+      newWindow.focus();
+    } else {
+      alert('Please allow popups for this site.');
+    }
+  };
+
   // Dummy components for demonstration
   const ComponentA = () => <div>Component A Content</div>;
   const ComponentB = () => (
@@ -69,6 +80,10 @@ export default function CheckpointsTab({
   const ComponentC = () => (
     <div>
         <TableTab tableData={tableData} setTableData={setTableData}/>
+        <br />
+        <Button style={{background: "#23366f"}} onClick={handlePreviewClick}>
+          Preview
+        </Button>
     </div>
   )
 
