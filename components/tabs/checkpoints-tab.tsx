@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { Checkpoint, Task, TableData } from "@/lib/types";
 import TasksTab from "@/components/tabs/extensions-tab";
 import TableTab from "@/components/tabs/table-tab";
+import SisInput from "@/components/tabs/sis-input";
 
 interface CheckpointsTabProps {
   checkpoints: Checkpoint[];
@@ -87,6 +88,12 @@ export default function CheckpointsTab({
     </div>
   )
 
+  const ComponentD = () => (
+    <div>
+        <SisInput tableData={tableData}/>
+    </div>
+  )
+
   // Component mapping
   const checkpointComponents = {
     0: ComponentA,
@@ -95,6 +102,7 @@ export default function CheckpointsTab({
     3: ComponentA,
     4: ComponentB,
     5: ComponentC,
+    7: ComponentD
     // Add more mappings as needed
   };
 

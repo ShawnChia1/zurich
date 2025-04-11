@@ -65,15 +65,13 @@ export async function insertExtensions(extensions: Extension[]): Promise<number[
   `;
 
   try {
-    const params: any[] = [];
+    const params: Record<string, any> = {};
     extensions.forEach((extension, index) => {
-      params.push(
-        extension.item,
-        extension.eventName,
-        extension.venue,
-        extension.eventDate,
-        extension.sumInsuredPerPerson
-      );
+      params[`item${index}`] = extension.item;
+      params[`eventName${index}`] = extension.eventName;
+      params[`venue${index}`] = extension.venue;
+      params[`eventDate${index}`] = extension.eventDate;
+      params[`sumInsuredPerPerson${index}`] = extension.sumInsuredPerPerson;
     });
 
     const result = await executeQuery<{ id: number }>(query, params);

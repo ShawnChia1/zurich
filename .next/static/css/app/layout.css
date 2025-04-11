@@ -1199,6 +1199,9 @@ video {
 .items-stretch {
   align-items: stretch;
 }
+.justify-end {
+  justify-content: flex-end;
+}
 .justify-center {
   justify-content: center;
 }
