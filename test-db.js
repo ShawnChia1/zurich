@@ -15,7 +15,7 @@ const config = {
 (async () => {
   try {
     const pool = await sql.connect(config);
-    console.log('✅ Connected to Azure SQL!');
+    console.log('Connected to Azure SQL!');
 
     // Optional: simple query test
     const result = await pool.request().query('SELECT TOP 1 name FROM sys.tables');
