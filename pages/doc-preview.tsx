@@ -45,18 +45,18 @@ const DocPreviewPage: React.FC = () => {
         <div className="md:col-span-2">GROUP PERSONAL ACCIDENT</div>
 
         <div className="font-semibold">Policy No.:</div>
-        <div className="md:col-span-2">ZZG8001782SN</div>
+        <div className="md:col-span-2">ZXXXXXXXXXN</div>
 
         <div className="font-semibold">The Insured:</div>
-        <div className="md:col-span-2">OUB CENTRE LIMITED</div>
+        <div className="md:col-span-2">XXX CEXXXE LIMITED</div>
 
         <div className="font-semibold">Postal Address:</div>
         <div className="md:col-span-2">
           1 RAFFLES PLACE
           <br />
-          #08-00 OUB CENTRE
+          #00-00 XXX CENTRE
           <br />
-          SINGAPORE 048616
+          SINGAPORE 000000
         </div>
 
         <div className="font-semibold">
@@ -66,7 +66,7 @@ const DocPreviewPage: React.FC = () => {
           <br />
           Of This Insurance):
         </div>
-        <div className="md:col-span-2">RAPID APPLICATION DEVELOPMENT</div>
+        <div className="md:col-span-2">FAST APPLICATION SERVICE</div>
 
         <div className="font-semibold">
           Period Of Insurance
@@ -89,19 +89,19 @@ const DocPreviewPage: React.FC = () => {
         <div className="md:col-span-2">AS PER DETAILS IN CONTINUATION SCHEDULE AND / OR POLICY</div>
 
         <div className="font-semibold">Annual Premium:</div>
-        <div className="md:col-span-2">SGD 645.00</div>
+        <div className="md:col-span-2">SGD 64500.00</div>
 
         <div className="font-semibold">Premium:</div>
-        <div className="md:col-span-2">SGD 645.00</div>
+        <div className="md:col-span-2">SGD 6045.00</div>
 
         <div className="font-semibold">Add GST 9%:</div>
-        <div className="md:col-span-2">SGD 58.05</div>
+        <div className="md:col-span-2">SGD 5800.05</div>
 
         <div className="font-semibold">Total Payable:</div>
-        <div className="md:col-span-2">SGD 703.05</div>
+        <div className="md:col-span-2">SGD 700003.05</div>
 
         <div className="font-semibold">Source:</div>
-        <div className="md:col-span-2">MARSH (SINGAPORE) PTE LTD</div>
+        <div className="md:col-span-2">BROKERNAME XXX (SINGAPORE) PTE LTD</div>
       </div>
 
       {/* Signature */}
@@ -150,7 +150,7 @@ const DocPreviewPage: React.FC = () => {
                     <br />
                     (ENHANCED 150% SCALE & INCLUDING 2ND & 3RD DEGREE BURNS)
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">A - 500,000</td>
+                  <td className="border border-gray-300 px-4 py-2">A - 5120,000</td>
                 </tr>
               </tbody>
             </table>
@@ -177,7 +177,7 @@ const DocPreviewPage: React.FC = () => {
                 <td className="border border-gray-300 px-4 py-2">GENERAL MANAGERS</td>
                 <td className="border border-gray-300 px-4 py-2">A</td>
                 <td className="border border-gray-300 px-4 py-2">1</td>
-                <td className="border border-gray-300 px-4 py-2">500,000</td>
+                <td className="border border-gray-300 px-4 py-2">100,000</td>
               </tr>
             </tbody>
           </table>
@@ -195,8 +195,8 @@ const DocPreviewPage: React.FC = () => {
             </thead>
             <tbody>
               <tr>
-                <td className="border border-gray-300 px-4 py-2">0.15</td>
-                <td className="border border-gray-300 px-4 py-2">PER SGD 1,000 SUM INSURED</td>
+                <td className="border border-gray-300 px-4 py-2">0.00</td>
+                <td className="border border-gray-300 px-4 py-2">PER SGD 0,000 SUM INSURED</td>
               </tr>
             </tbody>
           </table>
@@ -205,16 +205,16 @@ const DocPreviewPage: React.FC = () => {
         {/* Additional Policy Details */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="font-semibold">MINIMUM ANNUAL (DEPOSIT) PREMIUM:</div>
-          <div className="md:col-span-2">SGD 350</div>
+          <div className="md:col-span-2">SGD 050</div>
 
           <div className="font-semibold">OCCURRENCE LIMIT:</div>
-          <div className="md:col-span-2">SGD 4,300,000</div>
+          <div className="md:col-span-2">SGD 3100,000</div>
 
           <div className="font-semibold">CONVEYANCE LIMIT:</div>
-          <div className="md:col-span-2">SGD 4,300,000</div>
+          <div className="md:col-span-2">SGD 100,000</div>
 
           <div className="font-semibold">AGGREGATE TERRORISM LIMIT:</div>
-          <div className="md:col-span-2">SGD 4,300,000</div>
+          <div className="md:col-span-2">SGD 0,00,000</div>
 
           <div className="font-semibold">GEOGRAPHICAL LIMIT:</div>
           <div className="md:col-span-2">WORLDWIDE</div>
@@ -252,7 +252,7 @@ const DocPreviewPage: React.FC = () => {
                   ACCIDENTAL DEATH BENEFIT DUE TO NATURAL CATASTROPHE
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
-                  15% OF THE CAPITAL SUM INSURED OR 75,000 OR ITS EQUIVALENT, WHICHEVER IS LOWER.
+                  00% OF THE CAPITAL SUM INSURED OR 00,000 OR ITS EQUIVALENT, WHICHEVER IS LOWER.
                 </td>
               </tr>
             </tbody>

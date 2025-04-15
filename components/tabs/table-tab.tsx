@@ -46,6 +46,8 @@ import { stringify } from "querystring"
 interface TableTabProps {
   tableData: TableData
   setTableData: React.Dispatch<React.SetStateAction<TableData>>
+  columnOrder: string[]
+  setColumnOrder: React.Dispatch<React.SetStateAction<string[]>>
 }
 
 interface MergedCell {
@@ -66,7 +68,7 @@ interface CellInfo {
   isVisible: boolean
 }
 
-export default function TableEditor({ tableData, setTableData }: TableTabProps) {
+export default function TableEditor({ tableData, setTableData, columnOrder, setColumnOrder }: TableTabProps) {
   const [searchText, setSearchText] = useState("")
   const [selectedCells, setSelectedCells] = useState<string[]>([])
   const [mergedCells, setMergedCells] = useState<Record<string, MergedCell>>({})
@@ -625,6 +627,7 @@ export default function TableEditor({ tableData, setTableData }: TableTabProps) 
     const [draggedColumn] = newColumns.splice(draggedIndex, 1);
     newColumns.splice(targetIndex, 0, draggedColumn);
 
+    setColumnOrder(newColumns);
     setTableData(prevData => ({ ...prevData, columns: newColumns }));
   }, [tableData.columns, setTableData]);
 

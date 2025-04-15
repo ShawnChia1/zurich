@@ -45,7 +45,6 @@ export default function CheckpointsTab({
 }: CheckpointsTabProps) {
   const [response, setResponse] = useState<ResponseData | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
-
   const [tableData, setTableData] = useState<TableData>({
     rows: ["1", "2", "3"],
     columns: [
@@ -57,6 +56,11 @@ export default function CheckpointsTab({
     ],
     cells: {},
   });
+  const [columnOrder, setColumnOrder] = useState(tableData.columns);
+
+  useEffect(() => {
+    console.log("colOrder: " + columnOrder);
+  },[columnOrder]);
 
   useEffect(() => {
     (async function fetchSampleData() {
@@ -132,7 +136,7 @@ export default function CheckpointsTab({
   const ComponentC = () => (
     <div>
       
-      <TableTab tableData={tableData} setTableData={setTableData} />
+      <TableTab tableData={tableData} setTableData={setTableData} columnOrder={columnOrder} setColumnOrder={setColumnOrder} />
       <br />
       <div className="flex justify-between">
         <Button style={{ background: "#23366f" }} onClick={handlePreviewClick}>
