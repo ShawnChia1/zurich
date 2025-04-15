@@ -57,7 +57,7 @@ export async function insertExtensions(extensions: Extension[]): Promise<number[
   const query = `
     INSERT INTO [dbo].[Extension_Test] (Item, EventName, Venue, EventDate, SumInsuredPerPerson)
     VALUES ${extensions.map(
-      (_, index) => `(@Item${index}, @EventName${index}, @Venue${index}, @EventDate${index}, @SumInsuredPerPerson${index})`
+      (_, index) => `(@Item${index}, @EventName${index}, @Venue${index}, @EventDate${index}, @SumInsuredPerPerson${index}, @ColumnOrder${index})`
     ).join(', ')};
     SELECT SCOPE_IDENTITY() AS id;
   `;
@@ -70,6 +70,7 @@ export async function insertExtensions(extensions: Extension[]): Promise<number[
       params[`Venue${index}`] = extension.Venue;
       params[`EventDate${index}`] = extension.EventDate;
       params[`SumInsuredPerPerson${index}`] = extension.SumInsuredPerPerson;
+      params[`ColumnOrder${index}`] = extension.ColumnOrder;
     });
 
     const result = await executeQuery<{ id: number }>(query, params);

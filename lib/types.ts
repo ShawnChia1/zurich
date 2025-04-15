@@ -26,4 +26,5 @@ export interface Extension {
   Venue: string;
   EventDate: string;
   SumInsuredPerPerson: string;
+  ColumnOrder:string;
 }

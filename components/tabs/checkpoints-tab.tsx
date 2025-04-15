@@ -31,8 +31,9 @@ function convertTableDataToExtensions(tableData: TableData): Extension[] {
     const EventDate = tableData.cells[`${row}-Event Date`] ?? "";
     const SumInsuredPerPerson =
       tableData.cells[`${row}-Sum Insured Per Person`] ?? "";
+    const ColumnOrder = "N/A";
 
-    extensions.push({ Item, EventName, Venue, EventDate, SumInsuredPerPerson });
+    extensions.push({ Item, EventName, Venue, EventDate, SumInsuredPerPerson, ColumnOrder });
   });
 
   return extensions;
@@ -45,18 +46,12 @@ export default function CheckpointsTab({
 }: CheckpointsTabProps) {
   const [response, setResponse] = useState<ResponseData | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
   const [tableData, setTableData] = useState<TableData>({
     rows: ["1", "2", "3"],
-    columns: [
-      "Item",
-      "Event Name",
-      "Venue",
-      "Event Date",
-      "Sum Insured Per Person (SGD)",
-    ],
+    columns: [],
     cells: {},
   });
-  const [columnOrder, setColumnOrder] = useState(tableData.columns);
 
   useEffect(() => {
     console.log("colOrder: " + columnOrder);
@@ -79,6 +74,33 @@ export default function CheckpointsTab({
         // console.log(response.status);
         // console.log('Parsed JSON Data:', data);
         setTasks(data);
+      } catch (err) {
+        console.error('Error:', err);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async function getAllExtensions() {
+      try {
+        const response = await fetch('/api/extensions', {
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        // console.log(data[0].ColumnOrder.split(","));
+        setColumnOrder(data[0].ColumnOrder.split(","));
+        setTableData(prevData => ({
+          ...prevData,
+          columns: data[0].ColumnOrder.split(",")
+        }));
+        
       } catch (err) {
         console.error('Error:', err);
       }
