@@ -44,42 +44,7 @@ export default function CheckpointsTab({
   setCurrentCheckpoint,
 }: CheckpointsTabProps) {
   const [response, setResponse] = useState<ResponseData | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: "task1",
-      sn: "1",
-      extensions: "Accidental Death Benefit Due to Natural Catastrophe",
-      sumInsured:
-        "15% of the capital sum insured or up to 75,000 or its equivalent, whichever is lower.",
-    },
-    {
-      id: "task2",
-      sn: "2",
-      extensions: "Accidental Death Benefit Due to Gun Shot",
-      sumInsured:
-        "15% of the capital sum insured or up to 50,000 or its equivalent, whichever is lower.",
-    },
-    {
-      id: "task3",
-      sn: "3",
-      extensions:
-        "Assault, Hijack, Murder, Strike, Riot, Civil Commotion and Terrorism",
-      sumInsured: "Covered",
-    },
-    {
-      id: "task4",
-      sn: "4",
-      extensions: "Comatose State Benefit",
-      sumInsured:
-        "10% of the capital sum insured or up to 50,000 or its equivalent, whichever is lower.",
-    },
-    {
-      id: "task5",
-      sn: "5",
-      extensions: "Credit Card Indemnity",
-      sumInsured: "5,000",
-    },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   const [tableData, setTableData] = useState<TableData>({
     rows: ["1", "2", "3"],
@@ -92,6 +57,29 @@ export default function CheckpointsTab({
     ],
     cells: {},
   });
+
+  useEffect(() => {
+    (async function fetchSampleData() {
+      try {
+        const response = await fetch('/api/sample', {
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        // console.log(response.status);
+        // console.log('Parsed JSON Data:', data);
+        setTasks(data);
+      } catch (err) {
+        console.error('Error:', err);
+      }
+    })();
+  }, []);
 
   const handlePreviewClick = () => {
     localStorage.setItem("tableData", JSON.stringify(tableData));

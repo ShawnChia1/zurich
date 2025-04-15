@@ -1,5 +1,5 @@
 import sql, { ConnectionPool, config as SqlConfig, IResult } from 'mssql';
-import { Extension } from '@/lib/types'
+import { Extension, Task } from '@/lib/types'
 import { types } from 'util';
 
 const dbConfig: SqlConfig = {
@@ -43,6 +43,10 @@ export async function executeQuery<T = any>(
     console.error('Database query error:', error);
     throw error;
   }
+}
+
+export async function getSampleData(): Promise<Task[]> {
+  return executeQuery<Task>('SELECT * FROM [dbo].[Sample_Table]');
 }
 
 export async function getAllExtensions(): Promise<Extension[]> {
