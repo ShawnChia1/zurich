@@ -44,11 +44,11 @@ export async function executeQuery<T = any>(
 }
 
 export interface Extension {
-  item: number;
-  eventName: string;
-  venue: string;
-  eventDate: Date;
-  sumInsuredPerPerson: number;
+  Item: number;
+  EventName: string;
+  Venue: string;
+  EventDate: Date;
+  SumInsuredPerPerson: number;
 }
 
 export async function getAllExtensions(): Promise<Extension[]> {
@@ -57,9 +57,9 @@ export async function getAllExtensions(): Promise<Extension[]> {
 
 export async function insertExtensions(extensions: Extension[]): Promise<number[]> {
   const query = `
-    INSERT INTO [dbo].[Extension_Test] (item, eventName, venue, eventDate, sumInsuredPerPerson)
+    INSERT INTO [dbo].[Extension_Test] (Item, EventName, Venue, EventDate, SumInsuredPerPerson)
     VALUES ${extensions.map(
-      (_, index) => `(@item${index}, @eventName${index}, @venue${index}, @eventDate${index}, @sumInsuredPerPerson${index})`
+      (_, index) => `(@Item${index}, @EventName${index}, @Venue${index}, @EventDate${index}, @SumInsuredPerPerson${index})`
     ).join(', ')};
     SELECT SCOPE_IDENTITY() AS id;
   `;
@@ -67,11 +67,11 @@ export async function insertExtensions(extensions: Extension[]): Promise<number[
   try {
     const params: Record<string, any> = {};
     extensions.forEach((extension, index) => {
-      params[`item${index}`] = extension.item;
-      params[`eventName${index}`] = extension.eventName;
-      params[`venue${index}`] = extension.venue;
-      params[`eventDate${index}`] = extension.eventDate;
-      params[`sumInsuredPerPerson${index}`] = extension.sumInsuredPerPerson;
+      params[`Item${index}`] = extension.Item;
+      params[`EventName${index}`] = extension.EventName;
+      params[`Venue${index}`] = extension.Venue;
+      params[`EventDate${index}`] = extension.EventDate;
+      params[`SumInsuredPerPerson${index}`] = extension.SumInsuredPerPerson;
     });
 
     const result = await executeQuery<{ id: number }>(query, params);
