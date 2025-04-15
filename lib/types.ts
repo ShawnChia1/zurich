@@ -18,3 +18,12 @@ export interface TableData {
   isFullScreen?: boolean
   sortingState?: { id: string; desc: boolean }[]
 }
+
+
+export interface Extension {
+  Item: string;
+  EventName: string;
+  Venue: string;
+  EventDate: string;
+  SumInsuredPerPerson: string;
+}

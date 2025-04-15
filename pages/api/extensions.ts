@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getAllExtensions, insertExtensions, Extension } from "../../lib/db"; // Import insertExtensions and Extension
+import { getAllExtensions, insertExtensions } from "../../lib/db"; // Import insertExtensions and Extension
+import { Extension } from "@/lib/types"
 
 export default async function handler(
   req: NextApiRequest,

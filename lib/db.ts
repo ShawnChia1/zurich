@@ -1,4 +1,6 @@
 import sql, { ConnectionPool, config as SqlConfig, IResult } from 'mssql';
+import { Extension } from '@/lib/types'
+import { types } from 'util';
 
 const dbConfig: SqlConfig = {
   server: 'sg-np-wbsq-sql-z01.database.windows.net',
@@ -41,14 +43,6 @@ export async function executeQuery<T = any>(
     console.error('Database query error:', error);
     throw error;
   }
-}
-
-export interface Extension {
-  Item: number;
-  EventName: string;
-  Venue: string;
-  EventDate: Date;
-  SumInsuredPerPerson: number;
 }
 
 export async function getAllExtensions(): Promise<Extension[]> {

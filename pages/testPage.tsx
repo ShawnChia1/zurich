@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Extension } from '@/lib/db';
+import { Extension } from '@/lib/types';
 
 export default function ExtensionList() {
   const [extension, setextension] = useState<Extension[]>([]); // Added type to extension state
