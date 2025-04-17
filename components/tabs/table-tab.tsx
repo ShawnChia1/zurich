@@ -77,10 +77,10 @@ export default function TableEditor({ tableData, setTableData, columnOrder, setC
     "Event Name",
     "Venue",
     "Event Date",
-    "Sum Insured Per Person (SGD)",
+    "Sum Insured Per Person",
     "No of Participants",
-    "Premium Rate Per Participant (SGD)",
-    "Total Premium (SGD)",
+    "Premium Rate Per Participant",
+    "Total Premium",
   ])
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
   const [sorting, setSorting] = useState<SortingState>([])
@@ -828,7 +828,6 @@ export default function TableEditor({ tableData, setTableData, columnOrder, setC
             <tbody>
               {rows.map((row) => {
                 const rowId = row.original.id
-
                 // Create a map to track which cells have been rendered
                 // This helps us skip cells that are covered by merged cells
                 const renderedCells = new Set<string>()
@@ -848,7 +847,6 @@ export default function TableEditor({ tableData, setTableData, columnOrder, setC
 
                     {tableData.columns.map((column, colIndex) => {
                       const cellId = `${rowId}-${column}`
-
                       // Skip if this cell has already been rendered as part of a merged cell
                       if (renderedCells.has(cellId)) {
                         return null

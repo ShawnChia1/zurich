@@ -48,10 +48,14 @@ export default function CheckpointsTab({
   const [tasks, setTasks] = useState<Task[]>([]);
   const [columnOrder, setColumnOrder] = useState<string[]>([]);
   const [tableData, setTableData] = useState<TableData>({
-    rows: ["1", "2", "3"],
+    rows: [],
     columns: [],
     cells: {},
   });
+
+  useEffect(()=>{
+    console.log("tabledata: " + JSON.stringify(tableData.cells));
+  },[tableData]);
 
   useEffect(() => {
     console.log("colOrder: " + columnOrder);
@@ -94,12 +98,23 @@ export default function CheckpointsTab({
         }
 
         const data = await response.json();
-        // console.log(data[0].ColumnOrder.split(","));
+        console.log(data);
+        const rows:string[] = [];
+        let cells:Record<string, string> = {};
+        for (let row = 0; row < data.length; row++) {
+          rows.push(`${row}`);
+          Object.entries(data[row]).forEach(([key, value]) => {
+            if (key != 'ColumnOrder') {
+              cells[`${row}-${key.replace(/([A-Z])/g, ' $1').trim()}`] = value as string;
+            }
+          });
+        }
         setColumnOrder(data[0].ColumnOrder.split(","));
-        setTableData(prevData => ({
-          ...prevData,
-          columns: data[0].ColumnOrder.split(",")
-        }));
+        setTableData({
+          rows: rows,
+          columns: data[0].ColumnOrder.split(","),
+          cells: cells
+        });
         
       } catch (err) {
         console.error('Error:', err);
