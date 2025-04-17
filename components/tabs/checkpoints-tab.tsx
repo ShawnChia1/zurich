@@ -21,19 +21,37 @@ type ResponseData = {
   error?: string;
 };
 
-function convertTableDataToExtensions(tableData: TableData): Extension[] {
+function convertTableDataToExtensions(tableData: TableData, columnOrder: string[]): Extension[] {
   // console.log(tableData);
   const extensions: Extension[] = [];
   tableData.rows.forEach((row) => {
-    const Item = tableData.cells[`${row}-Item`] ?? "";
-    const EventName = tableData.cells[`${row}-Event Name`] ?? "";
-    const Venue = tableData.cells[`${row}-Venue`] ?? "";
-    const EventDate = tableData.cells[`${row}-Event Date`] ?? "";
-    const SumInsuredPerPerson =
-      tableData.cells[`${row}-Sum Insured Per Person`] ?? "";
-    const ColumnOrder = "N/A";
-
-    extensions.push({ Item, EventName, Venue, EventDate, SumInsuredPerPerson, ColumnOrder });
+    const ColumnOrder = columnOrder.join(",");
+    const extension: Extension = {ColumnOrder};
+    if (`${row}-Item` in tableData.cells) {
+      extension.Item = tableData.cells[`${row}-Item`] ?? "";
+    }
+    if (`${row}-Event Name` in tableData.cells) {
+      extension.EventName = tableData.cells[`${row}-Event Name`] ?? "";
+    }
+    if (`${row}-Venue` in tableData.cells) {
+      extension.Venue = tableData.cells[`${row}-Venue`] ?? "";
+    }
+    if (`${row}-Event Date` in tableData.cells) {
+      extension.EventDate = tableData.cells[`${row}-Event Date`] ?? "";
+    }
+    if (`${row}-Sum Insured Per Person` in tableData.cells) {
+      extension.SumInsuredPerPerson = tableData.cells[`${row}-Sum Insured Per Person`] ?? "";
+    }
+    if (`${row}-No Of Participants` in tableData.cells) {
+      extension.NoOfParticipants = tableData.cells[`${row}-No Of Participants`] ?? "";
+    }
+    if (`${row}-Premium Rate Per Participant` in tableData.cells) {
+      extension.PremiumRatePerParticipant = tableData.cells[`${row}-Premium Rate Per Participant`] ?? "";
+    }
+    if (`${row}-Total Premium` in tableData.cells) {
+      extension.TotalPremium = tableData.cells[`${row}-Total Premium`] ?? "";
+    }
+    extensions.push(extension as Extension);
   });
 
   return extensions;
@@ -54,7 +72,7 @@ export default function CheckpointsTab({
   });
 
   useEffect(()=>{
-    console.log("tabledata: " + JSON.stringify(tableData.cells));
+    console.log("tabledata: " + JSON.stringify(tableData));
   },[tableData]);
 
   useEffect(() => {
@@ -134,7 +152,7 @@ export default function CheckpointsTab({
   };
 
   const handleSaveClick = async () => {
-    const extensions: Extension[] = convertTableDataToExtensions(tableData);
+    const extensions: Extension[] = convertTableDataToExtensions(tableData, columnOrder);
     try {
       const res = await fetch("/api/extensions", {
         method: "POST",

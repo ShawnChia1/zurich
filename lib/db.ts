@@ -54,24 +54,54 @@ export async function getAllExtensions(): Promise<Extension[]> {
 }
 
 export async function insertExtensions(extensions: Extension[]): Promise<number[]> {
-  const query = `
-    INSERT INTO [dbo].[Extension_Test] (Item, EventName, Venue, EventDate, SumInsuredPerPerson)
-    VALUES ${extensions.map(
-      (_, index) => `(@Item${index}, @EventName${index}, @Venue${index}, @EventDate${index}, @SumInsuredPerPerson${index}, @ColumnOrder${index})`
-    ).join(', ')};
-    SELECT SCOPE_IDENTITY() AS id;
+  const columns: string[] = [
+    'Item', 'EventName', 'Venue', 'EventDate', 'SumInsuredPerPerson', 'NoOfParticipants', 'PremiumRatePerParticipant', 'TotalPremium'
+  ];
+  const presentColumns: string[] = columns.filter(column => column in extensions[0]).concat('ColumnOrder');
+  const valuesPlaceholders = extensions.map(
+    (_, index) => `(${presentColumns.map(column => `@${column}${index}`).join(', ').trim()})`
+  ).join(', ').trim();
+  const query = `DROP TABLE IF EXISTS [dbo].[Extension_Test]; CREATE TABLE [dbo].[Extension_Test] (
+    ${presentColumns.map(column => column + ' VARCHAR(255)').join(", ").trim()});
+    INSERT INTO [dbo].[Extension_Test] (${presentColumns.join(', ').trim()})
+    VALUES ${valuesPlaceholders};
   `;
+
+  // console.log("hello\n" + query);
 
   try {
     const params: Record<string, any> = {};
     extensions.forEach((extension, index) => {
-      params[`Item${index}`] = extension.Item;
-      params[`EventName${index}`] = extension.EventName;
-      params[`Venue${index}`] = extension.Venue;
-      params[`EventDate${index}`] = extension.EventDate;
-      params[`SumInsuredPerPerson${index}`] = extension.SumInsuredPerPerson;
+      // console.log("noOfParticipants: " + extension.NoOfParticipants);
+      if (extension.Item !== undefined) {
+        params[`Item${index}`] = extension.Item;
+      }
+      if (extension.EventName !== undefined) {
+        params[`EventName${index}`] = extension.EventName;
+      }
+      if (extension.Venue !== undefined) {
+        params[`Venue${index}`] = extension.Venue;
+      }
+      if (extension.EventDate !== undefined) {
+        params[`EventDate${index}`] = extension.EventDate;
+      }
+      if (extension.SumInsuredPerPerson !== undefined) {
+        params[`SumInsuredPerPerson${index}`] = extension.SumInsuredPerPerson;
+      }
+      if (extension.NoOfParticipants !== undefined) {
+        params[`NoOfParticipants${index}`] = extension.NoOfParticipants;
+      }
+      if (extension.PremiumRatePerParticipant !== undefined) {
+        params[`PremiumRatePerParticipant${index}`] = extension.PremiumRatePerParticipant;
+      }
+      if (extension.TotalPremium !== undefined) {
+        console.log("totalPremium: ", extension.TotalPremium);
+        params[`TotalPremium${index}`] = extension.TotalPremium;
+      }
       params[`ColumnOrder${index}`] = extension.ColumnOrder;
     });
+
+    console.log("params:\n", params);
 
     const result = await executeQuery<{ id: number }>(query, params);
     if(result && result.length > 0){

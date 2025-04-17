@@ -21,10 +21,13 @@ export interface TableData {
 
 
 export interface Extension {
-  Item: string;
-  EventName: string;
-  Venue: string;
-  EventDate: string;
-  SumInsuredPerPerson: string;
-  ColumnOrder:string;
+  Item?: string;
+  EventName?: string;
+  Venue?: string;
+  EventDate?: string;
+  SumInsuredPerPerson?: string;
+  NoOfParticipants?: string;
+  PremiumRatePerParticipant?: string;
+  TotalPremium?: string;
+  ColumnOrder: string;
 }

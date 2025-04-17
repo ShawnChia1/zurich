@@ -78,7 +78,7 @@ export default function TableEditor({ tableData, setTableData, columnOrder, setC
     "Venue",
     "Event Date",
     "Sum Insured Per Person",
-    "No of Participants",
+    "No Of Participants",
     "Premium Rate Per Participant",
     "Total Premium",
   ])
@@ -317,10 +317,21 @@ export default function TableEditor({ tableData, setTableData, columnOrder, setC
       setSelectedColumns([])
     }
 
-    setTableData((prev) => ({
-      ...prev,
-      columns: [...prev.columns, ...newColumns],
-    }))
+    setTableData((prev) => {
+      const updatedColumns = [...prev.columns, ...newColumns];
+      const updatedCells = {...prev.cells};
+
+      prev.rows.forEach((row) => {
+        newColumns.forEach((column) => {
+          const cellId = `${row}-${column}`;
+          updatedCells[cellId] = "";
+        })
+      })
+
+      return {...prev, columns: updatedColumns, cells: updatedCells};
+    })
+
+    setColumnOrder(columnOrder.concat(newColumns));
   }, [selectedColumns, tableData.columns.length, setTableData])
 
   // Add a new row
@@ -349,6 +360,10 @@ export default function TableEditor({ tableData, setTableData, columnOrder, setC
           columns: newColumns,
           cells: newCells,
         }
+      })
+
+      setColumnOrder((prev) => {
+        return prev.filter(column => column !== columnName);
       })
     },
     [setTableData],
