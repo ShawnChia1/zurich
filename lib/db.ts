@@ -59,11 +59,11 @@ export async function insertExtensions(extensions: Extension[]): Promise<number[
   ];
   const presentColumns: string[] = columns.filter(column => column in extensions[0]).concat('ColumnOrder');
   const valuesPlaceholders = extensions.map(
-    (_, index) => `(${presentColumns.map(column => `@${column}${index}`).join(', ').trim()})`
+    (_, index) => `(${presentColumns.map(column => `@${column}${index}`).join(', ')})`
   ).join(', ').trim();
-  const query = `DROP TABLE IF EXISTS [dbo].[Extension_Test]; CREATE TABLE [dbo].[Extension_Test] (
-    ${presentColumns.map(column => column + ' VARCHAR(255)').join(", ").trim()});
-    INSERT INTO [dbo].[Extension_Test] (${presentColumns.join(', ').trim()})
+  const query0 = `DROP TABLE IF EXISTS [dbo].[Extension_Test]; CREATE TABLE [dbo].[Extension_Test] (
+    ${presentColumns.map(column => column + ' VARCHAR(255)').join(", ")});`
+  const query =  `INSERT INTO [dbo].[Extension_Test] (${presentColumns.join(', ')})
     VALUES ${valuesPlaceholders};
   `;
 
@@ -95,7 +95,7 @@ export async function insertExtensions(extensions: Extension[]): Promise<number[
         params[`PremiumRatePerParticipant${index}`] = extension.PremiumRatePerParticipant;
       }
       if (extension.TotalPremium !== undefined) {
-        console.log("totalPremium: ", extension.TotalPremium);
+        // console.log("totalPremium: ", extension.TotalPremium);
         params[`TotalPremium${index}`] = extension.TotalPremium;
       }
       params[`ColumnOrder${index}`] = extension.ColumnOrder;
@@ -103,6 +103,8 @@ export async function insertExtensions(extensions: Extension[]): Promise<number[
 
     console.log("params:\n", params);
 
+    const result0 = await executeQuery<{ id: number }>(query0);
+    // console.log("result0: " + result0);
     const result = await executeQuery<{ id: number }>(query, params);
     if(result && result.length > 0){
         // return the id of the first inserted row.
