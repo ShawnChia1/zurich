@@ -1375,6 +1375,10 @@ video {
 .border-t-transparent {
   border-top-color: transparent;
 }
+.bg-\[\#dad2bd\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(218 210 189 / var(--tw-bg-opacity, 1));
+}
 .bg-\[--color-bg\] {
   background-color: var(--color-bg);
 }
@@ -1638,6 +1642,10 @@ video {
 }
 .tracking-widest {
   letter-spacing: 0.1em;
+}
+.text-\[\#23366f\] {
+  --tw-text-opacity: 1;
+  color: rgb(35 54 111 / var(--tw-text-opacity, 1));
 }
 .text-accent-foreground {
   color: hsl(var(--accent-foreground));
