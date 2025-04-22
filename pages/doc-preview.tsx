@@ -5,61 +5,42 @@ import { Button } from "@/components/ui/button"
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-const DocPreviewPage: React.FC = () => {
-  const [tableData, setTableData] = useState<TableData | null>(null);
-  const [isClient, setIsClient] = useState(false);
+interface DocPreviewPageProps {
+  onGeneratePdf: (blob: Blob) => void;
+  tableData: TableData
+}
+
+const DocPreviewPage: React.FC<DocPreviewPageProps> = ({ onGeneratePdf, tableData }) => {
+
   const docRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (isClient) {
-      const tableDataString = localStorage.getItem("tableData");
-      console.log(tableDataString);
-      if (tableDataString) {
-        try {
-          setTableData(JSON.parse(tableDataString));
-          localStorage.removeItem("tableData");
-        } catch (error) {
-          console.error("Error parsing tableData:", error);
-        }
-      }
-    }
-  }, [isClient]);
-
-  const handleDownloadPdf = () => {
+  const handleGeneratePdf = async () => {
     if (docRef.current) {
-      html2canvas(docRef.current).then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF();
-        const imgWidth = 210; // A4 width in mm
-        const pageHeight = 297; // A4 height in mm
-        const padding = 10; // Padding in mm
-        const contentWidth = imgWidth - 2 * padding;
-        const contentHeight = (canvas.height * contentWidth) / canvas.width;
-        let heightLeft = contentHeight;
-        let position = 0;
+      const canvas = await html2canvas(docRef.current);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF();
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const padding = 10; // Padding in mm
+      const contentWidth = imgWidth - 2 * padding;
+      const contentHeight = (canvas.height * contentWidth) / canvas.width;
+      let heightLeft = contentHeight;
+      let position = 0;
 
-        pdf.addImage(imgData, 'PNG', padding, position + padding, contentWidth, contentHeight);
+      pdf.addImage(imgData, 'PNG', padding, position + padding, contentWidth, contentHeight);
+      heightLeft -= pageHeight - 2 * padding;
+
+      while (heightLeft > 0) {
+        position = heightLeft - contentHeight + padding;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', padding, position, contentWidth, contentHeight);
         heightLeft -= pageHeight - 2 * padding;
+      }
 
-        while (heightLeft > 0) {
-          position = heightLeft - contentHeight + padding;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', padding, position, contentWidth, contentHeight);
-          heightLeft -= pageHeight - 2 * padding;
-        }
-
-        pdf.save('document.pdf');
-      });
+      const pdfBlob = pdf.output('blob');
+      onGeneratePdf(pdfBlob);
     }
   };
-
-  if (!isClient) {
-    return <div>Loading...</div>;
-  }
 
   if (!tableData) {
     return <div>No table data provided.</div>;
@@ -376,9 +357,12 @@ const DocPreviewPage: React.FC = () => {
           )}
         </div>
       </div>
-      <Button style={{ background: "#23366f" }} onClick={handleDownloadPdf}>
-        Download PDF
-      </Button>
+      <button
+        className="bg-[#dad2bd] text-[#23366f] py-2 px-4 rounded"
+        onClick={handleGeneratePdf}
+      >
+        Generate PDF
+      </button>
     </div>
   );
 };
